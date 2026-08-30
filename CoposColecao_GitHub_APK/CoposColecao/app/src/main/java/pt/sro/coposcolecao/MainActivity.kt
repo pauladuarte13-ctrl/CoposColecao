@@ -1,5 +1,5 @@
 package pt.sro.coposcolecao
-
+import androidx.compose.material.ExperimentalMaterialApi
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -30,7 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import java.io.File
 import kotlinx.coroutines.launch
-
+@OptIn(ExperimentalMaterialApi::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
