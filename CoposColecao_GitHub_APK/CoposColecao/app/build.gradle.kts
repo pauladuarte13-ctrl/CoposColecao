@@ -60,14 +60,16 @@ tasks.register("downloadImageEmbedderModel") {
         val target = imageEmbedderModel.asFile
         if (!target.exists()) {
             target.parentFile.mkdirs()
-            val modelUrl = URI(
-                "https://storage.googleapis.com/mediapipe-models/image_embedder/" +
-                "mobilenet_v3_small/float32/1/mobilenet_v3_small.tflite"
-            ).toURL()
-            println("A descarregar o modelo de IA para ${target.absolutePath}")
-            modelUrl.openStream().use { input ->
-                target.outputStream().use { output -> input.copyTo(output) }
-            }
+         val modelUrl = uri(
+    "https://storage.googleapis.com/mediapipe-models/image_embedder/" +
+    "mobilenet_v3_small/float32/1/mobilenet_v3_small.tflite"
+).toURL()
+
+println("A descarregar o modelo de IA para ${target.absolutePath}")
+
+modelUrl.openStream().use { input ->
+    target.outputStream().use { output -> input.copyTo(output) }
+}
         }
     }
 }
