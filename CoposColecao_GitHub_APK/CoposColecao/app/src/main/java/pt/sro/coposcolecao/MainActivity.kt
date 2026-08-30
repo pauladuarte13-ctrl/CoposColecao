@@ -1,5 +1,7 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package pt.sro.coposcolecao
-import androidx.compose.material.ExperimentalMaterialApi
+
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -31,7 +33,6 @@ import coil.compose.AsyncImage
 import java.io.File
 import kotlinx.coroutines.launch
 import androidx.compose.material3.ExperimentalMaterial3Api
-@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
