@@ -60,7 +60,7 @@ tasks.register("downloadImageEmbedderModel") {
         val target = imageEmbedderModel.asFile
         if (!target.exists()) {
             target.parentFile.mkdirs()
-            val modelUrl = java.net.URI(
+            val modelUrl = URI(
                 "https://storage.googleapis.com/mediapipe-models/image_embedder/" +
                 "mobilenet_v3_small/float32/1/mobilenet_v3_small.tflite"
             ).toURL()
