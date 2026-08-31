@@ -1,9 +1,4 @@
 plugins {
-    id("com.android.application") version "8.7.3" apply false
-    id("org.jetbrains.kotlin.android") version "2.1.0" apply false
-    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0" apply false
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29" apply false
-}plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -18,22 +13,24 @@ android {
         applicationId = "pt.sro.coposcolecao"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
     }
 
     buildFeatures {
         compose = true
         buildConfig = true
     }
-compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
 
-kotlinOptions {
-    jvmTarget = "17"
-}
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }
@@ -61,27 +58,34 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.google.mediapipe:tasks-vision:0.10.26")
+    implementation("com.google.mlkit:text-recognition:16.0.1")
 }
+
 val imageEmbedderModel = layout.projectDirectory.file(
     "src/main/assets/mobilenet_v3_small.tflite"
 )
 
 tasks.register("downloadImageEmbedderModel") {
     outputs.file(imageEmbedderModel)
+
     doLast {
         val target = imageEmbedderModel.asFile
+
         if (!target.exists()) {
             target.parentFile.mkdirs()
-         val modelUrl = uri(
-    "https://storage.googleapis.com/mediapipe-models/image_embedder/" +
-    "mobilenet_v3_small/float32/1/mobilenet_v3_small.tflite"
-).toURL()
 
-println("A descarregar o modelo de IA para ${target.absolutePath}")
+            val modelUrl = uri(
+                "https://storage.googleapis.com/mediapipe-models/image_embedder/" +
+                    "mobilenet_v3_small/float32/1/mobilenet_v3_small.tflite"
+            ).toURL()
 
-modelUrl.openStream().use { input ->
-    target.outputStream().use { output -> input.copyTo(output) }
-}
+            println("A descarregar o modelo de IA para ${target.absolutePath}")
+
+            modelUrl.openStream().use { input ->
+                target.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
         }
     }
 }
