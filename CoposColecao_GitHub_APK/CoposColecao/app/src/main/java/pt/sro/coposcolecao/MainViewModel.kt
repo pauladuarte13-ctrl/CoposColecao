@@ -59,11 +59,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 val threshold = if (detectedBrand != null) 65 else 78
 
-                val similar = if (candidates.isEmpty()) {
+                // A comparação por IA é a parte mais pesada. Antes, uma coleção grande
+                // podia obrigar a executar o modelo dezenas de vezes. O dHash já está
+                // guardado em cada copo e é praticamente instantâneo, por isso serve
+                // apenas para escolher os candidatos mais promissores. A decisão final
+                // continua a ser feita pela IA, não pelo formato/dHash.
+                val aiCandidates = candidates
+                    .asSequence()
+                    .map { item ->
+                        item to ImageSimilarity.hammingDistance(hash, item.imageHash)
+                    }
+                    .sortedBy { (_, distance) -> distance }
+                    .take(12)
+                    .map { (item, _) -> item }
+                    .toList()
+
+                val similar = if (aiCandidates.isEmpty()) {
                     emptyList()
                 } else {
                     AiImageSimilarity(getApplication()).use { ai ->
-                        candidates.map { item ->
+                        aiCandidates.map { item ->
                             SimilarGlass(item, ai.similarity(path, item.photoPath))
                         }
                             .filter { it.similarity >= threshold }
