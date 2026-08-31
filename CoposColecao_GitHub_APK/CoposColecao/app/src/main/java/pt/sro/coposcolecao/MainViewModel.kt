@@ -48,12 +48,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 // automaticamente copos de marcas diferentes só porque têm a mesma forma.
                 val detectedText = runCatching { textRecognizer.recognize(path) }.getOrDefault("")
                 val detectedBrand = detectKnownBrand(detectedText, all)
+                // A marca é um sinal forte, mas não pode ser um bloqueio absoluto:
+                // o OCR pode falhar por reflexos, gravações claras ou pequenas mudanças de ângulo.
+                // Se reconhecemos a marca, comparamos apenas com essa marca e aceitamos uma
+                // semelhança visual mais baixa. Se o OCR não reconhece a marca, ainda fazemos
+                // uma pesquisa visual conservadora em toda a coleção.
                 val candidates = detectedBrand?.let { brand ->
                     all.filter { normalize(it.brand) == normalize(brand) }
-                }.orEmpty()
+                } ?: all
 
-                // A imagem completa só serve para distinguir modelos DENTRO da mesma marca.
-                // Se a marca não for reconhecida, não inventamos um duplicado visual.
+                val threshold = if (detectedBrand != null) 65 else 78
+
                 val similar = if (candidates.isEmpty()) {
                     emptyList()
                 } else {
@@ -61,7 +66,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         candidates.map { item ->
                             SimilarGlass(item, ai.similarity(path, item.photoPath))
                         }
-                            .filter { it.similarity >= 82 }
+                            .filter { it.similarity >= threshold }
                             .sortedByDescending { it.similarity }
                             .take(5)
                     }
