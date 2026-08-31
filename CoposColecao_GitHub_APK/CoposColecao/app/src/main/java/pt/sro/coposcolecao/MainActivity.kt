@@ -263,35 +263,100 @@ private fun SimilarityDialog(
     onCancel: () -> Unit,
     onContinue: () -> Unit
 ) {
+    var candidateIndex by remember(pending.path) { mutableIntStateOf(0) }
+    val candidates = pending.similar.take(3)
+    val candidate = candidates[candidateIndex.coerceIn(0, candidates.lastIndex)]
+
     AlertDialog(
         onDismissRequest = {},
-        title = { Text("Possível duplicado") },
+        title = { Text("Possível correspondência") },
         text = {
             Column {
-                Text("A marca ${pending.detectedBrand ?: "reconhecida"} foi detetada. Estes copos da mesma marca podem corresponder ao mesmo modelo.")
-                Spacer(Modifier.height(12.dp))
-                AsyncImage(
-                    model = File(pending.path),
-                    contentDescription = "Nova fotografia",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
-                    contentScale = ContentScale.Crop
+                Text(
+                    "Compare a fotografia nova com o copo já existente antes de decidir.",
+                    style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(Modifier.height(12.dp))
-                pending.similar.take(3).forEach {
-                    Text(
-                        "#${it.glass.sequenceNumber.toString().padStart(4, '0')} · " +
-                                "${it.glass.brand.ifBlank { "Sem marca" }} · ${it.similarity}%"
-                    )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Fotografado agora",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        AsyncImage(
+                            model = File(pending.path),
+                            contentDescription = "Fotografia nova",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(180.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Na coleção",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        AsyncImage(
+                            model = File(candidate.glass.photoPath),
+                            contentDescription = "Copo existente",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(180.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    "#${candidate.glass.sequenceNumber.toString().padStart(4, '0')} · " +
+                        "${candidate.glass.brand.ifBlank { "Sem marca" }} · " +
+                        "${candidate.similarity}% de semelhança",
+                    fontWeight = FontWeight.Bold
+                )
+
+                pending.detectedBrand?.let {
+                    Spacer(Modifier.height(4.dp))
+                    Text("Marca detetada: $it", style = MaterialTheme.typography.bodySmall)
+                }
+
+                if (candidates.size > 1) {
+                    Spacer(Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextButton(
+                            onClick = { candidateIndex-- },
+                            enabled = candidateIndex > 0
+                        ) { Text("Anterior") }
+
+                        Text("${candidateIndex + 1} de ${candidates.size}")
+
+                        TextButton(
+                            onClick = { candidateIndex++ },
+                            enabled = candidateIndex < candidates.lastIndex
+                        ) { Text("Seguinte") }
+                    }
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = onContinue) { Text("Adicionar mesmo assim") }
+            Button(onClick = onCancel) { Text("É o mesmo copo") }
         },
         dismissButton = {
-            TextButton(onClick = onCancel) { Text("Cancelar") }
+            TextButton(onClick = onContinue) { Text("É diferente — adicionar") }
         }
     )
 }
